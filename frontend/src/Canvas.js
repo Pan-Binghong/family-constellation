@@ -1,14 +1,11 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useDrop } from 'react-dnd';
 import FamilyMember from './FamilyMember';
 import './index.css';
 
 const MEMBER_SIZE = 90;
-const MIN_DISTANCE = 0; // 成员之间最小间距
+const MIN_DISTANCE = 0;
 
-/**
- * 获取避免重叠的位置
- */
 function getNonOverlappingPosition(x, y, members, currentId, canvasWidth, canvasHeight) {
   let safeX = x;
   let safeY = y;
@@ -32,17 +29,19 @@ function getNonOverlappingPosition(x, y, members, currentId, canvasWidth, canvas
   return { x: safeX, y: safeY };
 }
 
-const Canvas = ({ members, updateMemberPosition }) => {
+// ... existing code ...
+const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, ref) => {
   const [, drop] = useDrop({
     accept: 'MEMBER',
     drop: (item, monitor) => {
       const clientOffset = monitor.getClientOffset();
       const canvas = document.getElementById('canvas-area');
-      const canvasRect = canvas?.getBoundingClientRect();
-      if (!clientOffset || !canvasRect) return;
-      // 以成员中心为基准
-      let x = clientOffset.x - canvasRect.left - MEMBER_SIZE / 2;
-      let y = clientOffset.y - canvasRect.top - MEMBER_SIZE / 2;
+      if (!clientOffset || !canvas) return;
+      const canvasRect = canvas.getBoundingClientRect();
+      const relativeX = clientOffset.x - canvasRect.left;
+      const relativeY = clientOffset.y - canvasRect.top;
+      let x = relativeX - MEMBER_SIZE / 2;
+      let y = relativeY - MEMBER_SIZE / 2;
       x = Math.max(0, Math.min(x, canvasRect.width - MEMBER_SIZE));
       y = Math.max(0, Math.min(y, canvasRect.height - MEMBER_SIZE));
       const { x: safeX, y: safeY } = getNonOverlappingPosition(
@@ -55,10 +54,16 @@ const Canvas = ({ members, updateMemberPosition }) => {
   return (
     <div
       id="canvas-area"
-      ref={drop}
+      ref={node => {
+        drop(node);
+        if (ref) {
+          if (typeof ref === 'function') ref(node);
+          else ref.current = node;
+        }
+      }}
       className="mx-auto relative bg-white border-4 border-black rounded-xl overflow-hidden shadow-inner select-none"
       style={{
-        width: 1800,
+        width: 1200,
         height: 500,
         backgroundImage: `
           radial-gradient(circle,rgb(188, 175, 200) 1px, transparent 1px),
@@ -66,6 +71,7 @@ const Canvas = ({ members, updateMemberPosition }) => {
         `,
         backgroundSize: '20px 20px, 100% 100%',
         backgroundPosition: '0 0, 0 0',
+        boxSizing: 'border-box',
       }}
     >
       {members.length === 0 ? (
@@ -74,11 +80,12 @@ const Canvas = ({ members, updateMemberPosition }) => {
         </div>
       ) : (
         members.map(member => (
-          <FamilyMember key={member.id} member={member} />
+          <FamilyMember key={member.id} member={member} onUpdate={onUpdateMember} />
         ))
       )}
     </div>
   );
-};
+});
+// ... existing code ...
 
 export default Canvas;
