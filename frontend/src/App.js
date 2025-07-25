@@ -10,8 +10,8 @@ const useCanvasSize = () => {
     const viewportHeight = window.innerHeight;
     
     return {
-      width: viewportWidth,
-      height: Math.min(viewportHeight * 0.4, 500)
+      width: viewportWidth * 1.0, // 宽度增加20%
+      height: Math.min(viewportHeight * 0.7, 900)
     };
   }, []);
 
@@ -44,24 +44,29 @@ const useCanvasSize = () => {
 };
 
 const PRESET_ROLES = [
-  { role: '祖父', icon: '👴', shape: 'square' },
-  { role: '祖母', icon: '👵', shape: 'circle' },
-  { role: '外祖父', icon: '👴', shape: 'square' },  
-  { role: '外祖母', icon: '👵', shape: 'circle' },
-  { role: '丈夫', icon: '👨', shape: 'square' },
-  { role: '妻子', icon: '👩', shape: 'circle' },
-  { role: '儿子', icon: '👦', shape: 'square' },
-  { role: '女儿', icon: '👧', shape: 'circle' },
-  { role: '姐姐', icon: '👩‍🦰', shape: 'circle' },
-  { role: '哥哥', icon: '🧑‍🦱', shape: 'square' },
-  { role: '弟弟', icon: '🧑‍🎓', shape: 'square' },
-  { role: '妹妹', icon: '👧', shape: 'circle' },
-  { role: '前任', icon: '💔', shape: 'square' },
-  { role: 'unknown', icon: '❓', shape: 'triangle' },
+  { role: '自己', icon: '🧑', gender: 'male' },
+  { role: '父亲', icon: '👨', gender: 'male' },
+  { role: '母亲', icon: '👩', gender: 'female' },
+  { role: '祖父', icon: '👴', gender: 'male' },
+  { role: '祖母', icon: '👵', gender: 'female' },
+  { role: '外祖父', icon: '👴', gender: 'male' },  
+  { role: '外祖母', icon: '👵', gender: 'female' },
+  { role: '丈夫', icon: '👨', gender: 'male' },
+  { role: '妻子', icon: '👩', gender: 'female' },
+  { role: '儿子', icon: '👦', gender: 'male' },
+  { role: '女儿', icon: '👧', gender: 'female' },
+  { role: '姐姐', icon: '👩‍🦰', gender: 'female' },
+  { role: '哥哥', icon: '🧑‍🦱', gender: 'male' },
+  { role: '弟弟', icon: '🧑‍🎓', gender: 'male' },
+  { role: '妹妹', icon: '👧', gender: 'female' },
+  { role: '前任', icon: '💔', gender: 'male' },
+  { role: '疾病', icon: '🏥', gender: 'male', shape: 'triangle' },
+  { role: '金钱', icon: '💰', gender: 'male', shape: 'triangle' },
+  { role: '矛盾', icon: '⚔️', gender: 'male', shape: 'triangle' },
 ];
 
 // 定义直系亲属角色
-const IMMEDIATE_FAMILY_ROLES = ['丈夫', '妻子', '儿子', '女儿'];
+const IMMEDIATE_FAMILY_ROLES = ['自己', '父亲', '母亲', '丈夫', '妻子', '儿子', '女儿'];
 
 export default function App() {
   // 使用动态画布尺寸Hook
@@ -74,7 +79,7 @@ export default function App() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [icon, setIcon] = useState('🧑');
-  const [shape, setShape] = useState('square');
+  const [gender, setGender] = useState('male');
   const [isDeceased, setIsDeceased] = useState(false);
   const [analysis, setAnalysis] = useState('');
   const [loading, setLoading] = useState(false);
@@ -101,7 +106,13 @@ export default function App() {
     }
 
     const isChild = role.includes('儿子') || role.includes('女儿');
+    const isSpecialRole = role === '疾病' || role === '金钱' || role === '矛盾';
     const defaultSize = isChild ? 48 : 72;
+    
+    // 获取预设角色的特殊形状
+    const presetRole = PRESET_ROLES.find(p => p.role === role);
+    const specialShape = presetRole?.shape;
+    
     setMembers([
       ...members,
       {
@@ -109,7 +120,8 @@ export default function App() {
         name,
         role,
         icon,
-        shape,
+        gender,
+        shape: specialShape, // 添加特殊形状
         isDeceased,
         x: 100,
         y: 100,
@@ -121,15 +133,16 @@ export default function App() {
     setName('');
     setRole('');
     setIcon('🧑');
-    setShape('square');
+    setGender('male');
     setIsDeceased(false);
   };
 
   const quickAdd = preset => {
     setRole(preset.role);
     setIcon(preset.icon);
-    setShape(preset.shape);
+    setGender(preset.gender);
     setName('');
+    // 如果有特殊形状，也设置到状态中（虽然UI中没有显示，但会在添加时使用）
   };
 
   const onUpdateMember = (id, changes) => {
@@ -364,12 +377,12 @@ export default function App() {
           {/* 标题 */}
           <h1 className="text-3xl font-bold text-blue-700 text-center mb-4 drop-shadow-sm">家庭成员排列分析</h1>
           
-          {/* 画布尺寸指示器 */}
-          <div className="text-center mb-4 p-2 bg-blue-100 rounded-lg">
+          {/* 画布尺寸指示器 - 已隐藏 */}
+          {/* <div className="text-center mb-4 p-2 bg-blue-100 rounded-lg">
             <span className="text-sm font-medium text-blue-700">
               画布尺寸: {canvasSize.width} × {canvasSize.height} px
             </span>
-          </div>
+          </div> */}
           
           {/* 表单区域 */}
           <div className="bg-blue-50 border border-blue-200 rounded-3xl shadow-lg p-6 mb-6">
@@ -386,13 +399,13 @@ export default function App() {
             </div>
             <div className="flex flex-wrap gap-3 items-center justify-center mb-4">
               <input
-                className="border-2 border-blue-300 p-3 text-lg rounded-xl w-full sm:w-48 focus:outline-none focus:border-blue-500 transition shadow bg-white font-bold"
+                className="border-2 border-blue-300 p-3 text-lg rounded-xl w-full sm:w-40 focus:outline-none focus:border-blue-500 transition shadow bg-white font-bold"
                 placeholder="姓名"
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
               <input
-                className="border-2 border-blue-300 p-3 text-lg rounded-xl w-full sm:w-48 focus:outline-none focus:border-blue-500 transition shadow bg-white font-bold"
+                className="border-2 border-blue-300 p-3 text-lg rounded-xl w-full sm:w-40 focus:outline-none focus:border-blue-500 transition shadow bg-white font-bold"
                 placeholder="关系"
                 value={role}
                 onChange={e => setRole(e.target.value)}
@@ -408,12 +421,11 @@ export default function App() {
               </select>
               <select
                 className="border-2 border-blue-300 p-3 text-sm rounded-xl bg-white shadow focus:outline-none focus:border-blue-500 transition font-bold"
-                value={shape}
-                onChange={e => setShape(e.target.value)}
+                value={gender}
+                onChange={e => setGender(e.target.value)}
               >
-                <option value="square">方形</option>
-                <option value="circle">圆形</option>
-                <option value="triangle">三角形</option>
+                <option value="male">男性</option>
+                <option value="female">女性</option>
               </select>
               <div className="flex items-center gap-2">
                 <input
@@ -429,7 +441,7 @@ export default function App() {
               </div>
               <button
                 onClick={addMember}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-lg font-extrabold shadow-md transition-transform hover:scale-105"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl text-lg font-extrabold shadow-md transition-transform hover:scale-105"
               >
                 添加成员
               </button>
@@ -467,7 +479,8 @@ export default function App() {
             >
               ⬇️ 导出数据
             </button>
-            <button
+            {/* 调试按钮 - 已隐藏 */}
+            {/* <button
               onClick={validateAndFixMemberPositions}
               disabled={members.length === 0}
               className="bg-white border border-yellow-300 text-yellow-700 px-4 py-2 rounded-xl font-medium shadow-sm hover:bg-yellow-100 transition hover:scale-105 disabled:opacity-50"
@@ -512,7 +525,7 @@ export default function App() {
               className="bg-white border border-purple-300 text-purple-700 px-4 py-2 rounded-xl font-medium shadow-sm hover:bg-purple-100 transition hover:scale-105 disabled:opacity-50"
             >
               🔍 调试坐标
-            </button>
+            </button> */}
             <button
               onClick={clearMembers}
               disabled={members.length === 0}
@@ -534,8 +547,8 @@ export default function App() {
         </div>
       </div>
       
-      {/* 测试组件 */}
-      {process.env.NODE_ENV === 'development' && <TestComponent />}
+      {/* 测试组件 - 已隐藏 */}
+      {/* {process.env.NODE_ENV === 'development' && <TestComponent />} */}
     </div>
   );
 }

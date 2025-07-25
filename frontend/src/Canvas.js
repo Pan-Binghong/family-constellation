@@ -59,10 +59,10 @@ const getCanvasSize = () => {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
   
-  // 画布宽度占满页面宽度，高度占页面高度的40%
+  // 画布宽度增加20%，高度占页面高度的90%
   return {
-    width: viewportWidth,
-    height: Math.min(viewportHeight * 0.4, 500) // 最大500px
+    width: viewportWidth * 1.0, // 宽度增加20%
+    height: Math.min(viewportHeight * 0.7, 900) // 最大1200px
   };
 };
 
@@ -353,8 +353,8 @@ const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, re
         ))
       )}
       
-              {/* 开发模式下的坐标调试面板 */}
-        {process.env.NODE_ENV === 'development' && members.length > 0 && (
+              {/* 开发模式下的坐标调试面板 - 已隐藏 */}
+        {/* {process.env.NODE_ENV === 'development' && members.length > 0 && (
           <div style={{
             position: 'absolute',
             bottom: 10,
@@ -393,7 +393,7 @@ const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, re
               );
             })}
           </div>
-        )}
+        )} */}
     </div>
   );
 });

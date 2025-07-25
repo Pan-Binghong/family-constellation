@@ -53,7 +53,15 @@ const FamilyMember = ({ member, onUpdate }) => {
   const [resizing, setResizing] = useState(false);
   const [resizeStart, setResizeStart] = useState(null);
 
-  const shape = member.gender === 'female' ? 'circle' : member.shape || 'square'; // 确保 shape 在 validDirection 之前定义
+  // 根据角色和性别设置形状
+  let shape;
+  if (member.shape) {
+    shape = member.shape; // 如果有特殊形状设置，优先使用
+  } else if (member.gender === 'female') {
+    shape = 'circle'; // 女性为圆形
+  } else {
+    shape = 'square'; // 男性为方形
+  }
 
   const positionConfigForValidation = shape === 'triangle' ? triangleArrowPositions : arrowPositions;
   const validDirection = member.direction && positionConfigForValidation[member.direction] ? member.direction : 'north';
@@ -133,7 +141,19 @@ const FamilyMember = ({ member, onUpdate }) => {
 
   const renderResizeHandle = useCallback(() => (
     <div
+      data-resize-handle="true"
       onMouseDown={handleResizeMouseDown}
+      onMouseLeave={(e) => {
+        // 检查鼠标是否移动到了家庭成员或旋转旋钮上
+        const relatedTarget = e.relatedTarget;
+        if (relatedTarget && (
+          relatedTarget.closest('[data-rotate-button]') || 
+          relatedTarget.closest('[data-family-member]')
+        )) {
+          return; // 如果鼠标移动到其他相关元素上，不隐藏
+        }
+        setHovered(false);
+      }}
       style={{
         position: 'absolute',
         right: -25,
@@ -144,7 +164,7 @@ const FamilyMember = ({ member, onUpdate }) => {
         border: '2px solid #6366f1',
         borderRadius: 8,
         cursor: 'nwse-resize',
-        zIndex: 30,
+        zIndex: 3000,
         boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         display: 'flex',
         alignItems: 'center',
@@ -202,37 +222,62 @@ const FamilyMember = ({ member, onUpdate }) => {
     <div
       style={{ position: 'absolute', left: member.x, top: member.y, zIndex: 2000 }}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={(e) => {
+        // 检查鼠标是否移动到了旋钮上
+        const relatedTarget = e.relatedTarget;
+        if (relatedTarget && (
+          relatedTarget.closest('[data-rotate-button]') || 
+          relatedTarget.closest('[data-resize-handle]')
+        )) {
+          return; // 如果鼠标移动到旋钮上，不隐藏
+        }
+        setHovered(false);
+      }}
     >
-      <button
-        onClick={handleRotate}
-        onMouseDown={(e) => e.stopPropagation()}
-        style={{
-          position: 'absolute',
-          top: -40,
-          left: -40,
-          zIndex: 20,
-          background: '#fff',
-          border: '2px solid #6366f1',
-          borderRadius: '50%',
-          width: 32,
-          height: 32,
-          cursor: 'pointer',
-          padding: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-        }}
-        title={`箭头朝向: ${validDirection}`}
-      >
-        <svg width="18" height="18" viewBox="0 0 16 16">
-          <path d="M8 2v2.5a.5.5 0 0 0 .5.5H11" stroke="#6366f1" strokeWidth="1.5" fill="none" />
-          <path d="M13.5 8A5.5 5.5 0 1 1 8 2" stroke="#6366f1" strokeWidth="1.5" fill="none" />
-        </svg>
-      </button>
+      {hovered && (
+        <button
+          data-rotate-button="true"
+          onClick={handleRotate}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseLeave={(e) => {
+            // 检查鼠标是否移动到了家庭成员或缩放旋钮上
+            const relatedTarget = e.relatedTarget;
+            if (relatedTarget && (
+              relatedTarget.closest('[data-resize-handle]') || 
+              relatedTarget.closest('[data-family-member]')
+            )) {
+              return; // 如果鼠标移动到其他相关元素上，不隐藏
+            }
+            setHovered(false);
+          }}
+          style={{
+            position: 'absolute',
+            top: -20,
+            left: -20,
+            zIndex: 3000,
+            background: '#fff',
+            border: '2px solid #6366f1',
+            borderRadius: '50%',
+            width: 32,
+            height: 32,
+            cursor: 'pointer',
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            transition: 'opacity 0.2s ease-in-out'
+          }}
+          title={`箭头朝向: ${validDirection}`}
+        >
+          <svg width="18" height="18" viewBox="0 0 16 16">
+            <path d="M8 2v2.5a.5.5 0 0 0 .5.5H11" stroke="#6366f1" strokeWidth="1.5" fill="none" />
+            <path d="M13.5 8A5.5 5.5 0 1 1 8 2" stroke="#6366f1" strokeWidth="1.5" fill="none" />
+          </svg>
+        </button>
+      )}
 
-      <div ref={drag} style={getContainerStyle()}>
+      <div ref={drag} data-family-member="true" style={getContainerStyle()}>
         {renderDirectionTriangle()}
 
         {member.isDeceased && (
@@ -285,7 +330,7 @@ const FamilyMember = ({ member, onUpdate }) => {
           {member.role}
         </div>
 
-        {renderResizeHandle()}
+        {hovered && renderResizeHandle()}
       </div>
     </div>
   );
