@@ -3,28 +3,24 @@ import Canvas from './Canvas';
 import axios from 'axios';
 
 const PRESET_ROLES = [
-  { role: '自己', icon: '🧑' },
-  { role: '父亲', icon: '👨' },
-  { role: '母亲', icon: '👩' },
-  { role: '丈夫', icon: '👨' },
-  { role: '妻子', icon: '👩' },
-  { role: '儿子', icon: '👦' },
-  { role: '女儿', icon: '👧' },
-  { role: '孩子', icon: '🧒' },
-  { role: '祖父', icon: '👴' },
-  { role: '祖母', icon: '👵' },
-  { role: '配偶', icon: '💑' },
-  { role: '哥哥', icon: '🧑‍🦱' },
-  { role: '姐姐', icon: '👩‍🦰' },
-  { role: '弟弟', icon: '🧑‍🎓' },
-  { role: '妹妹', icon: '👧' },
-  { role: '继父', icon: '🧔' },
-  { role: '继母', icon: '👩‍🦳' },
-  { role: '养父', icon: '🧓' },
-  { role: '养母', icon: '👵' },
-  { role: '朋友', icon: '🤝' },
-  { role: '宠物', icon: '🐶' },
+  { role: '祖父', icon: '👴', shape: 'square' },
+  { role: '祖母', icon: '👵', shape: 'circle' },
+  { role: '外祖父', icon: '👴', shape: 'square' },  
+  { role: '外祖母', icon: '👵', shape: 'circle' },
+  { role: '丈夫', icon: '👨', shape: 'square' },
+  { role: '妻子', icon: '👩', shape: 'circle' },
+  { role: '儿子', icon: '👦', shape: 'square' },
+  { role: '女儿', icon: '👧', shape: 'circle' },
+  { role: '姐姐', icon: '👩‍🦰', shape: 'circle' },
+  { role: '哥哥', icon: '🧑‍🦱', shape: 'square' },
+  { role: '弟弟', icon: '🧑‍🎓', shape: 'square' },
+  { role: '妹妹', icon: '👧', shape: 'circle' },
+  { role: '前任', icon: '💔', shape: 'square' },
+  { role: 'unknown', icon: '❓', shape: 'triangle' },
 ];
+
+// 定义直系亲属角色
+const IMMEDIATE_FAMILY_ROLES = ['丈夫', '妻子', '儿子', '女儿'];
 
 export default function App() {
   const [members, setMembers] = useState(() => {
@@ -34,20 +30,33 @@ export default function App() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [icon, setIcon] = useState('🧑');
+  const [shape, setShape] = useState('square');
   const [isDeceased, setIsDeceased] = useState(false);
   const [analysis, setAnalysis] = useState('');
   const [loading, setLoading] = useState(false);
   const [dragCompleted, setDragCompleted] = useState(false);
   const canvasRef = useRef(null);
-  const [gender, setGender] = useState('');
 
   useEffect(() => {
     localStorage.setItem('members', JSON.stringify(members));
   }, [members]);
 
   const addMember = () => {
-    if (!name || !role || !gender) return;
-    const isChild = role.includes('儿子') || role.includes('女儿') || role.includes('孩子');
+    if (!name || !role) {
+      alert('请填写姓名和关系。');
+      return;
+    }
+
+    const isImmediateFamilyRole = IMMEDIATE_FAMILY_ROLES.includes(role);
+    const hasImmediateFamily = members.some(member => IMMEDIATE_FAMILY_ROLES.includes(member.role));
+
+    // 强制先添加直系亲属
+    if (!hasImmediateFamily && !isImmediateFamilyRole) {
+      alert('请先添加至少一位直系亲属（如：丈夫、妻子、儿子、女儿）。');
+      return;
+    }
+
+    const isChild = role.includes('儿子') || role.includes('女儿');
     const defaultSize = isChild ? 48 : 72;
     setMembers([
       ...members,
@@ -56,11 +65,11 @@ export default function App() {
         name,
         role,
         icon,
+        shape,
         isDeceased,
-        gender,
         x: 100,
         y: 100,
-        direction: 'up',
+        direction: 'north', // 初始朝向
         width: defaultSize,
         height: defaultSize
       }
@@ -68,13 +77,14 @@ export default function App() {
     setName('');
     setRole('');
     setIcon('🧑');
+    setShape('square');
     setIsDeceased(false);
-    setGender('');
   };
 
   const quickAdd = preset => {
     setRole(preset.role);
     setIcon(preset.icon);
+    setShape(preset.shape);
     setName('');
   };
 
@@ -85,7 +95,7 @@ export default function App() {
   const generateDescription = () => {
     return members.map(m => {
       const status = m.isDeceased ? '（已故）' : '';
-      return `${m.name}（${m.role}）${status}位于(${m.x}, ${m.y})`;
+      return `${m.name}（${m.role}）${status}位于(${m.x}, ${m.y})，朝向${m.direction}`;
     }).join('，');
   };
 
@@ -109,7 +119,7 @@ export default function App() {
   };
 
   const captureCanvas = async () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) return null; 
     
     try {
       // 动态导入html2canvas
@@ -156,6 +166,24 @@ export default function App() {
     setMembers(members => members.map(m => (m.id === id ? { ...m, x, y } : m)));
   };
 
+  // 导出成员数据
+  const exportMembersData = () => {
+    if (members.length === 0) {
+      alert('没有成员数据可以导出。');
+      return;
+    }
+    const dataStr = JSON.stringify(members, null, 2); // 美化 JSON 格式
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'family_members_data.json'; // 导出文件名
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // 释放 URL 对象
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-6 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl p-6 sm:p-10 border border-blue-100">
@@ -195,15 +223,14 @@ export default function App() {
                 <option key={preset.role} value={preset.icon} className="text-2xl font-bold">{preset.icon}</option>
               ))}
             </select>
-            {/* 性别选择 */}
             <select
               className="border-2 border-blue-300 p-6 text-xl rounded-2xl bg-white shadow focus:outline-none focus:border-blue-500 transition font-bold"
-              value={gender}
-              onChange={e => setGender(e.target.value)}
+              value={shape}
+              onChange={e => setShape(e.target.value)}
             >
-              <option value="">选择性别</option>
-              <option value="male">男</option>
-              <option value="female">女</option>
+              <option value="square">方形</option>
+              <option value="circle">圆形</option>
+              <option value="triangle">三角形</option>
             </select>
             <div className="flex items-center gap-2">
               <input
@@ -257,6 +284,14 @@ export default function App() {
             }`}
           >
             {loading ? '分析中...' : '🔍 文字分析'}
+          </button>
+          {/* 导出按钮 */}
+          <button
+            onClick={exportMembersData}
+            disabled={members.length === 0}
+            className="bg-white border border-green-300 text-green-700 px-6 py-2 rounded-xl font-medium shadow-sm hover:bg-green-100 transition hover:scale-105 disabled:opacity-50"
+          >
+            ⬇️ 导出数据
           </button>
           <button
             onClick={clearMembers}
