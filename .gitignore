@@ -1,0 +1,132 @@
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python 相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Python 虚拟环境
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Python 包管理
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Node.js 相关
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# 依赖锁定文件（可选，通常建议提交）
+# package-lock.json
+# yarn.lock
+
+# React 相关
+frontend/build/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# 日志文件
+*.log
+logs/
+*.log.*
+
+# 临时文件
+*.tmp
+*.temp
+.cache/
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 配置文件（包含敏感信息）
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 上传的文件
+uploads/
+media/
+
+# 测试覆盖率报告
+coverage/
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 图片和媒体文件（如果需要忽略）
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+# *.mp4
+# *.avi
+
+# 文档文件（如果需要忽略）
+# *.pdf
+# *.doc
+# *.docx
+
+# 其他
+*.pid
+*.seed
+*.pid.lock 

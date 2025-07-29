@@ -1,1 +1,77 @@
-body { background: hwb(196 69% 15%) !important; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply antialiased;
+  }
+  
+  body {
+    @apply font-sans text-neutral-800 bg-gradient-to-br from-neutral-50 to-primary-50;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold text-neutral-900;
+  }
+  
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+  
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl lg:text-3xl;
+  }
+  
+  input, textarea, select {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  button {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .glass-effect {
+    @apply bg-white/70 backdrop-blur-md border border-white/20;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-soft border border-neutral-100/50;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-6 py-3 rounded-xl shadow-medium hover:shadow-strong transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-neutral-50 text-neutral-700 font-medium px-6 py-3 rounded-xl shadow-soft border border-neutral-200 hover:border-neutral-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 bg-white placeholder-neutral-400 text-neutral-900 shadow-soft focus:shadow-medium;
+  }
+
+  /* 页面标题样式 */
+  .page-title {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* 画布容器样式 */
+  .canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0;
+  }
+}

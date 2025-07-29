@@ -1,0 +1,82 @@
+{
+  "members": [
+    {
+      "id": 1753424829745,
+      "name": "me",
+      "role": "自己",
+      "icon": "🧑",
+      "gender": "male",
+      "isDeceased": false,
+      "x": 566,
+      "y": 219,
+      "direction": "south",
+      "width": 69,
+      "height": 69
+    },
+    {
+      "id": 1753426672939,
+      "name": "mom",
+      "role": "母亲",
+      "icon": "👩",
+      "gender": "female",
+      "isDeceased": false,
+      "x": 430,
+      "y": 199,
+      "direction": "south",
+      "width": 87,
+      "height": 87
+    },
+    {
+      "id": 1753426701209,
+      "name": "dad",
+      "role": "父亲",
+      "icon": "👨",
+      "gender": "male",
+      "isDeceased": false,
+      "x": 1200,
+      "y": 459,
+      "direction": "southeast",
+      "width": 72,
+      "height": 72
+    },
+    {
+      "id": 1753427431534,
+      "name": "lin",
+      "role": "丈夫",
+      "icon": "👨",
+      "gender": "male",
+      "isDeceased": false,
+      "x": 684.5,
+      "y": 216.5,
+      "direction": "south",
+      "width": 78,
+      "height": 78
+    },
+    {
+      "id": 1753680505059,
+      "name": "bobo",
+      "role": "外祖父",
+      "icon": "👴",
+      "gender": "male",
+      "isDeceased": false,
+      "x": 523,
+      "y": 103,
+      "direction": "south",
+      "width": 72,
+      "height": 72
+    },
+    {
+      "id": 1753680515529,
+      "name": "momo",
+      "role": "外祖母",
+      "icon": "👵",
+      "gender": "female",
+      "isDeceased": false,
+      "x": 631.5,
+      "y": 106.5,
+      "direction": "south",
+      "width": 85,
+      "height": 85
+    }
+  ]
+}

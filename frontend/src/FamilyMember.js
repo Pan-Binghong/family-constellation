@@ -156,8 +156,8 @@ const FamilyMember = ({ member, onUpdate }) => {
       }}
       style={{
         position: 'absolute',
-        right: -25,
-        bottom: -25,
+        right: -15,
+        bottom: -15,
         width: 24,
         height: 24,
         background: '#fff',
@@ -252,8 +252,8 @@ const FamilyMember = ({ member, onUpdate }) => {
           }}
           style={{
             position: 'absolute',
-            top: -20,
-            left: -20,
+            top: -15,
+            left: -15,
             zIndex: 3000,
             background: '#fff',
             border: '2px solid #6366f1',
