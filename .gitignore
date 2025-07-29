@@ -130,3 +130,7 @@ htmlcov/
 *.pid
 *.seed
 *.pid.lock 
+
+node_modules/
+.cache/
+*.pack
