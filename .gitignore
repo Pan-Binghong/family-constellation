@@ -135,3 +135,6 @@ htmlcov/
 node_modules/
 .cache/
 *.pack
+
+# 忽略构建缓存
+frontend/node_modules/
