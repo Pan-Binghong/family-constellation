@@ -1,8 +1,6 @@
-// API 配置
+// API 配置 - 使用nginx反向代理
 const API_CONFIG = {
-  host: "221.181.122.58",
-  port: 23006,
-  path: "/v1/chat/completions",
+  path: "/family/api/model/completions",
   model: "qwen3"
 };
 
@@ -193,12 +191,11 @@ async function callAnalysisAPI(prompt) {
       'Accept': 'application/json',
       'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
       'Content-Type': 'application/json',
-      'Host': `${API_CONFIG.host}:${API_CONFIG.port}`,
       'Connection': 'keep-alive'
     };
 
-    // 使用 fetch API 发送请求
-    const response = await fetch(`http://${API_CONFIG.host}:${API_CONFIG.port}${API_CONFIG.path}`, {
+    // 使用 fetch API 发送请求 - 通过nginx反向代理
+    const response = await fetch(API_CONFIG.path, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(payload)
