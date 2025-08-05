@@ -59,10 +59,10 @@ const getCanvasSize = () => {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
   
-  // 画布宽度增加20%，高度占页面高度的90%
+  // 画布宽度减少，高度增加
   return {
-    width: viewportWidth * 1.0, // 宽度增加20%
-    height: Math.min(viewportHeight * 0.7, 900) // 最大1200px
+    width: viewportWidth * 0.8, // 宽度减少到80%
+    height: Math.min(viewportHeight * 0.85, 1000) // 高度增加到85%，最大1000px
   };
 };
 
@@ -102,7 +102,12 @@ const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, re
   const CANVAS_HEIGHT = canvasSize.height;
   
   // 打印画布尺寸信息
-  console.log('🎨 Canvas 渲染 - 动态尺寸:', { width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+  console.log('🎨 Canvas 渲染 - 动态尺寸:', { 
+    width: CANVAS_WIDTH, 
+    height: CANVAS_HEIGHT,
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    calculated: { width: window.innerWidth * 0.8, height: Math.min(window.innerHeight * 0.85, 1000) }
+  });
   
   // 监听画布DOM变化
   useEffect(() => {
@@ -136,6 +141,12 @@ const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, re
         CSS样式尺寸: { 
           width: computedStyle.width, 
           height: computedStyle.height 
+        },
+        差异检查: {
+          宽度匹配: Math.abs(CANVAS_WIDTH - rect.width) < 1,
+          高度匹配: Math.abs(CANVAS_HEIGHT - rect.height) < 1,
+          宽度差值: CANVAS_WIDTH - rect.width,
+          高度差值: CANVAS_HEIGHT - rect.height
         },
         缩放比例: { 
           x: contentWidth / CANVAS_WIDTH, 
@@ -321,28 +332,29 @@ const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, re
   });
 
   return (
-    <div
-      id="canvas-area"
-      ref={node => {
-        drop(node);
-        if (ref) {
-          if (typeof ref === 'function') ref(node);
-          else ref.current = node;
-        }
-      }}
-      className="relative bg-white border-b-4 border-black overflow-hidden shadow-inner select-none"
-      style={{
-        width: CANVAS_WIDTH,
-        height: CANVAS_HEIGHT,
-        backgroundImage: `
-          radial-gradient(circle,rgb(188, 175, 200) 1px, transparent 1px),
-          linear-gradient(#f3f4f6,rgb(255, 255, 255))
-        `,
-        backgroundSize: '20px 20px, 100% 100%',
-        backgroundPosition: '0 0, 0 0',
-        boxSizing: 'content-box', // 使用content-box，边框在外部
-      }}
-    >
+    <div className="flex justify-center items-start p-4 h-full overflow-auto">
+      <div
+        id="canvas-area"
+        ref={node => {
+          drop(node);
+          if (ref) {
+            if (typeof ref === 'function') ref(node);
+            else ref.current = node;
+          }
+        }}
+        className="relative bg-white border-b-4 border-black overflow-hidden shadow-inner select-none"
+        style={{
+          width: CANVAS_WIDTH,
+          height: CANVAS_HEIGHT,
+          backgroundImage: `
+            radial-gradient(circle,rgb(188, 175, 200) 1px, transparent 1px),
+            linear-gradient(#f3f4f6,rgb(255, 255, 255))
+          `,
+          backgroundSize: '20px 20px, 100% 100%',
+          backgroundPosition: '0 0, 0 0',
+          boxSizing: 'content-box', // 使用content-box，边框在外部
+        }}
+      >
       {members.length === 0 ? (
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-400 text-xl font-semibold select-none">
           请添加家庭成员并拖动到画布
@@ -394,6 +406,7 @@ const Canvas = forwardRef(({ members, updateMemberPosition, onUpdateMember }, re
             })}
           </div>
         )} */}
+      </div>
     </div>
   );
 });
