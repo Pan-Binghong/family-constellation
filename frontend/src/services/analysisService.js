@@ -1,8 +1,20 @@
-// API 配置 - 使用nginx反向代理
-const API_CONFIG = {
-  path: "/family/api/model/completions",
-  model: "qwen3"
+// API 配置 - 支持多个模型
+const API_CONFIGS = {
+  qwen3: {
+    type: "nginx_proxy",
+    path: "/family/api/model/completions",
+    model: "qwen3"
+  },
+  chatanywhere: {
+    type: "direct_api",
+    baseURL: "https://api.chatanywhere.tech/v1",
+    apiKey: "sk-lC1Sy1NfZRVpKwQd5mezrDGCxa3Fss7JkL3x4MGMHrD0vVzn",
+    model: "gpt-4o-ca"
+  }
 };
+
+// 默认使用的模型
+const DEFAULT_MODEL = "chatanywhere";
 
 /**
  * 将家庭成员JSON列表转为适合大模型分析的文本描述
@@ -168,10 +180,15 @@ function filterThinkingContent(text) {
 /**
  * 调用 API 进行分析
  */
-async function callAnalysisAPI(prompt) {
+async function callAnalysisAPI(prompt, modelName = DEFAULT_MODEL) {
   try {
+    const config = API_CONFIGS[modelName];
+    if (!config) {
+      throw new Error(`不支持的模型: ${modelName}`);
+    }
+
     const payload = {
-      model: API_CONFIG.model,
+      model: config.model,
       messages: [
         {
           role: "system",
@@ -182,20 +199,33 @@ async function callAnalysisAPI(prompt) {
           content: prompt
         }
       ],
-      max_tokens: 800,
+      max_tokens: 40960,
       temperature: 0.7,
       stream: false
     };
 
-    const headers = {
+    let headers = {
       'Accept': 'application/json',
-      'User-Agent': 'Apifox/1.0.0 (https://apifox.com)',
       'Content-Type': 'application/json',
       'Connection': 'keep-alive'
     };
 
-    // 使用 fetch API 发送请求 - 通过nginx反向代理
-    const response = await fetch(API_CONFIG.path, {
+    let url;
+    
+    // 根据配置类型处理不同的API调用方式
+    if (config.type === "nginx_proxy") {
+      // nginx反向代理方式
+      url = config.path;
+      headers['User-Agent'] = 'Apifox/1.0.0 (https://apifox.com)';
+    } else if (config.type === "direct_api") {
+      // 直接API调用方式
+      url = `${config.baseURL}/chat/completions`;
+      headers['Authorization'] = `Bearer ${config.apiKey}`;
+    } else {
+      throw new Error(`不支持的API类型: ${config.type}`);
+    }
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(payload)
@@ -234,7 +264,7 @@ async function callAnalysisAPI(prompt) {
 /**
  * 分析家庭成员排列
  */
-export async function analyzeFamilyMembers(members) {
+export async function analyzeFamilyMembers(members, modelName = DEFAULT_MODEL) {
   try {
     // 生成描述
     const description = membersToDescription(members);
@@ -243,12 +273,13 @@ export async function analyzeFamilyMembers(members) {
     const prompt = buildPrompt(description);
     
     // 调用 API
-    const analysis = await callAnalysisAPI(prompt);
+    const analysis = await callAnalysisAPI(prompt, modelName);
     
     return {
       success: true,
       description: description,
-      analysis: analysis
+      analysis: analysis,
+      model: modelName
     };
     
   } catch (error) {
